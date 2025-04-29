@@ -1,0 +1,101 @@
+exp 13
+
+
+
+1. Create Tables with Constraints
+sql
+Copy
+Edit
+CREATE TABLE menu (
+    item_id INT PRIMARY KEY,
+    item_name VARCHAR(100) NOT NULL,
+    price DECIMAL(6,2) CHECK (price > 0),
+    category VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE orders (
+    order_id INT PRIMARY KEY,
+    item_id INT,
+    customer_name VARCHAR(100) NOT NULL,
+    order_date DATE NOT NULL,
+    quantity INT CHECK (quantity > 0),
+    FOREIGN KEY (item_id) REFERENCES menu(item_id)
+);
+✅ 2. Insert Sample Data
+sql
+Copy
+Edit
+INSERT INTO menu VALUES 
+(1, 'Paneer Butter Masala', 220.0, 'Main Course'),
+(2, 'Masala Dosa', 90.0, 'Breakfast'),
+(3, 'Gulab Jamun', 60.0, 'Dessert');
+
+INSERT INTO orders VALUES 
+(101, 1, 'Rohit Sharma', '2025-04-15', 2),
+(102, 2, 'Anjali Mehta', '2025-04-16', 3),
+(103, 3, 'Vikas Gupta', '2025-04-17', 1);
+✅ 3. Update the Price of One Menu Item
+sql
+Copy
+Edit
+UPDATE menu
+SET price = 240.0
+WHERE item_id = 1;
+✅ 4. Delete One Order Record
+sql
+Copy
+Edit
+DELETE FROM orders
+WHERE order_id = 102;
+✅ 5. Display Order Details with Menu Information
+sql
+Copy
+Edit
+SELECT 
+    o.order_id,
+    o.customer_name,
+    m.item_name,
+    m.category,
+    o.quantity,
+    m.price,
+    o.order_date
+FROM 
+    orders o
+JOIN 
+    menu m ON o.item_id = m.item_id;
+✅ 6. Show Total Orders per Menu Item
+sql
+Copy
+Edit
+SELECT 
+    m.item_id,
+    m.item_name,
+    SUM(o.quantity) AS total_quantity_ordered
+FROM 
+    menu m
+LEFT JOIN 
+    orders o ON m.item_id = o.item_id
+GROUP BY 
+    m.item_id, m.item_name;
+✅ 7. Create Users for Cashier and Manager with Appropriate Privileges
+sql
+Copy
+Edit
+-- Create users
+CREATE USER 'cashier'@'localhost' IDENTIFIED BY 'cashier123';
+CREATE USER 'manager'@'localhost' IDENTIFIED BY 'manager123';
+
+-- Grant privileges
+GRANT SELECT, INSERT ON restaurant_db.orders TO 'cashier'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE ON restaurant_db.* TO 'manager'@'localhost';
+
+-- Apply changes
+FLUSH PRIVILEGES;
+🔁 Replace restaurant_db with your actual database name.
+
+✅ 8. Drop All Tables
+sql
+Copy
+Edit
+DROP TABLE orders;
+DROP TABLE menu;

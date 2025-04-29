@@ -1,0 +1,130 @@
+exp 12
+
+1. Create Tables with Constraints
+sql
+Copy
+Edit
+CREATE TABLE vehicles (
+    vehicle_id INT PRIMARY KEY,
+    vehicle_no VARCHAR(20) UNIQUE NOT NULL,
+    type VARCHAR(30) NOT NULL,
+    capacity INT CHECK (capacity > 0)
+);
+
+CREATE TABLE deliveries (
+    delivery_id INT PRIMARY KEY,
+    vehicle_id INT,
+    destination VARCHAR(100) NOT NULL,
+    weight INT CHECK (weight > 0),
+    delivery_date DATE NOT NULL,
+    FOREIGN KEY (vehicle_id) REFERENCES vehicles(vehicle_id)
+);
+
+
+
+2. Insert Sample Data
+sql
+Copy
+Edit
+INSERT INTO vehicles VALUES 
+(1, 'MH12AB1234', 'Truck', 10000),
+(2, 'DL8CAF4321', 'Van', 2000),
+(3, 'KA05CD5678', 'Mini Truck', 5000);
+
+INSERT INTO deliveries VALUES 
+(101, 1, 'Pune', 8000, '2025-04-15'),
+(102, 2, 'Delhi', 1500, '2025-04-16'),
+(103, 3, 'Bangalore', 4000, '2025-04-17');
+
+
+
+
+
+
+3. Update the Capacity of One Vehicle
+sql
+Copy
+Edit
+UPDATE vehicles
+SET capacity = 12000
+WHERE vehicle_id = 1;
+✅ 4. Delete One Delivery Record
+sql
+Copy
+Edit
+DELETE FROM deliveries
+WHERE delivery_id = 102;
+
+
+
+5. Display Delivery Details with Vehicle Information
+sql
+Copy
+Edit
+SELECT 
+    d.delivery_id,
+    v.vehicle_no,
+    v.type,
+    d.destination,
+    d.weight,
+    d.delivery_date
+FROM 
+    deliveries d
+JOIN 
+    vehicles v ON d.vehicle_id = v.vehicle_id;
+✅ 6. Show Total Deliveries per Vehicle
+sql
+Copy
+Edit
+SELECT 
+    v.vehicle_id,
+    v.vehicle_no,
+    COUNT(d.delivery_id) AS total_deliveries
+FROM 
+    vehicles v
+LEFT JOIN 
+    deliveries d ON v.vehicle_id = d.vehicle_id
+GROUP BY 
+    v.vehicle_id, v.vehicle_no;
+
+
+
+
+
+
+ 7. Create and Use a Function to Check if a Vehicle Can Carry a Given Weight
+🔧 Create the Function:
+sql
+Copy
+Edit
+DELIMITER $$
+
+CREATE FUNCTION can_carry(vehicle_cap INT, delivery_weight INT)
+RETURNS VARCHAR(50)
+DETERMINISTIC
+BEGIN
+    IF vehicle_cap >= delivery_weight THEN
+        RETURN 'Yes';
+    ELSE
+        RETURN 'No';
+    END IF;
+END $$
+
+DELIMITER ;
+🧪 Use the Function:
+Example — Can a vehicle with 5000 kg capacity carry 6000 kg?
+
+sql
+Copy
+Edit
+SELECT can_carry(5000, 6000) AS result;
+
+
+
+
+ 8. Drop All Tables
+sql
+Copy
+Edit
+DROP TABLE deliveries;
+DROP TABLE vehicles;

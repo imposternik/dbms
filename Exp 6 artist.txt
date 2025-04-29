@@ -1,0 +1,77 @@
+Exp 6 
+
+CREATE TABLE artists (
+    artist_id INT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    city VARCHAR(50)
+);
+
+CREATE TABLE albums (
+    album_id INT PRIMARY KEY,
+    artist_id INT,
+    title VARCHAR(100) NOT NULL,
+    release_year INT,
+    price DECIMAL(8,2) CHECK (price > 0),
+    FOREIGN KEY (artist_id) REFERENCES artists(artist_id)
+);
+
+
+-- Insert into artists
+INSERT INTO artists VALUES
+(1, 'A. R. Rahman', 'Chennai'),
+(2, 'Shreya Ghoshal', 'Mumbai'),
+(3, 'Arijit Singh', 'Kolkata');
+
+-- Insert into albums
+INSERT INTO albums VALUES
+(101, 1, 'Roja', 1992, 250.00),
+(102, 1, 'Dil Se', 1998, 300.00),
+(103, 2, 'Melodies', 2015, 200.00),
+(104, 3, 'Soulful Voice', 2018, 220.00);
+
+UPDATE albums
+SET price = 270.00
+WHERE album_id = 103;
+
+
+DELETE FROM artists
+WHERE artist_id = 3;
+
+
+SELECT 
+    a.title AS album_title,
+    ar.name AS artist_name
+FROM albums a
+JOIN artists ar ON a.artist_id = ar.artist_id;
+
+
+SELECT 
+    ar.name AS artist_name,
+    COUNT(al.album_id) AS album_count
+FROM artists ar
+LEFT JOIN albums al ON ar.artist_id = al.artist_id
+GROUP BY ar.artist_id, ar.name;
+
+
+-- Create the function
+DELIMITER //
+
+CREATE FUNCTION TotalAlbumValue(aid INT) RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    DECLARE total DECIMAL(10,2);
+    SELECT SUM(price) INTO total
+    FROM albums
+    WHERE artist_id = aid;
+    RETURN IFNULL(total, 0);
+END //
+
+DELIMITER ;
+
+-- Example usage:
+SELECT name, TotalAlbumValue(artist_id) AS total_value
+FROM artists;
+
+
+DROP TABLE IF EXISTS albums;
+DROP TABLE IF EXISTS artists;

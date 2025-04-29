@@ -1,0 +1,81 @@
+Exp 8 
+
+CREATE TABLE rooms (
+    room_id INT PRIMARY KEY,
+    room_type VARCHAR(50) NOT NULL,
+    rate_per_night DECIMAL(8,2) CHECK (rate_per_night > 0),
+    status VARCHAR(20) CHECK (status IN ('Available', 'Occupied', 'Maintenance'))
+);
+
+CREATE TABLE bookings (
+    booking_id INT PRIMARY KEY,
+    room_id INT,
+    guest_name VARCHAR(100) NOT NULL,
+    check_in DATE NOT NULL,
+    nights INT CHECK (nights > 0),
+    total_amount DECIMAL(10,2) CHECK (total_amount > 0),
+    FOREIGN KEY (room_id) REFERENCES rooms(room_id)
+);
+
+
+-- Insert into rooms
+INSERT INTO rooms VALUES
+(101, 'Deluxe', 3500.00, 'Available'),
+(102, 'Super Deluxe', 4500.00, 'Occupied'),
+(103, 'Suite', 6000.00, 'Available');
+
+-- Insert into bookings
+INSERT INTO bookings VALUES
+(1, 101, 'Anand Verma', '2025-04-15', 2, 7000.00),
+(2, 102, 'Meera Reddy', '2025-04-16', 3, 13500.00),
+(3, 103, 'Suresh Kumar', '2025-04-17', 1, 6000.00);
+
+
+UPDATE rooms
+SET rate_per_night = 5000.00
+WHERE room_id = 102;
+
+
+DELETE FROM bookings
+WHERE booking_id = 2;
+
+
+SELECT 
+    b.booking_id,
+    b.guest_name,
+    b.check_in,
+    b.nights,
+    b.total_amount,
+    r.room_type,
+    r.rate_per_night,
+    r.status
+FROM bookings b
+JOIN rooms r ON b.room_id = r.room_id;
+
+
+SELECT 
+    r.room_type,
+    SUM(b.total_amount) AS total_revenue
+FROM rooms r
+JOIN bookings b ON r.room_id = b.room_id
+GROUP BY r.room_type;
+
+
+DELIMITER //
+
+CREATE PROCEDURE CheckRoomAvailability(IN room INT)
+BEGIN
+    SELECT 
+        room_id, room_type, status
+    FROM rooms
+    WHERE room_id = room;
+END //
+
+DELIMITER ;
+
+-- Example execution:
+CALL CheckRoomAvailability(101);
+
+
+DROP TABLE IF EXISTS bookings;
+DROP TABLE IF EXISTS rooms;

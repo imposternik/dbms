@@ -1,0 +1,104 @@
+exp 15
+
+
+
+1. Create Tables with Constraints
+sql
+Copy
+Edit
+CREATE TABLE members (
+    member_id INT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    join_date DATE NOT NULL,
+    membership_type VARCHAR(20) CHECK (membership_type IN ('Monthly','Quarterly','Yearly')),
+    fee_paid DECIMAL(8,2) CHECK (fee_paid > 0)
+);
+
+CREATE TABLE attendance (
+    attendance_id INT PRIMARY KEY,
+    member_id INT,
+    check_in DATETIME NOT NULL,
+    check_out DATETIME,
+    workout_type VARCHAR(50) NOT NULL,
+    FOREIGN KEY (member_id) REFERENCES members(member_id)
+);
+✅ 2. Insert Sample Data
+sql
+Copy
+Edit
+INSERT INTO members VALUES
+(1, 'Karan Malhotra', '2025-01-15', 'Monthly', 2000.00),
+(2, 'Priya Desai', '2025-02-01', 'Quarterly', 5500.00),
+(3, 'Rahul Singh', '2025-03-10', 'Yearly', 20000.00);
+
+INSERT INTO attendance VALUES
+(101, 1, '2025-04-15 06:30:00', '2025-04-15 07:45:00', 'Cardio'),
+(102, 2, '2025-04-15 08:00:00', '2025-04-15 09:30:00', 'Weight Training'),
+(103, 3, '2025-04-15 17:00:00', '2025-04-15 18:15:00', 'Yoga');
+✅ 3. Update Fee Paid for One Member
+sql
+Copy
+Edit
+UPDATE members
+SET fee_paid = 2200.00
+WHERE member_id = 1;
+✅ 4. Delete One Attendance Record
+sql
+Copy
+Edit
+DELETE FROM attendance
+WHERE attendance_id = 102;
+✅ 5. Display Attendance Details with Member Information
+sql
+Copy
+Edit
+SELECT 
+    a.attendance_id,
+    m.name,
+    a.check_in,
+    a.check_out,
+    a.workout_type
+FROM attendance a
+JOIN members m ON a.member_id = m.member_id;
+✅ 6. Show Total Attendance Per Member
+sql
+Copy
+Edit
+SELECT 
+    m.member_id,
+    m.name,
+    COUNT(a.attendance_id) AS total_attendance
+FROM members m
+LEFT JOIN attendance a ON m.member_id = a.member_id
+GROUP BY m.member_id, m.name;
+✅ 7. Create and Use a Function to Calculate Workout Duration
+🔧 Create Function
+sql
+Copy
+Edit
+DELIMITER $$
+
+CREATE FUNCTION workout_duration(start_time DATETIME, end_time DATETIME)
+RETURNS TIME
+DETERMINISTIC
+BEGIN
+    RETURN TIMEDIFF(end_time, start_time);
+END $$
+
+DELIMITER ;
+🧪 Example Usage
+sql
+Copy
+Edit
+SELECT 
+    attendance_id,
+    member_id,
+    workout_type,
+    workout_duration(check_in, check_out) AS duration
+FROM attendance;
+✅ 8. Drop All Tables
+sql
+Copy
+Edit
+DROP TABLE attendance;
+DROP TABLE members;

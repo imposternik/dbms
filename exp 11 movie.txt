@@ -1,0 +1,152 @@
+exp 11
+
+
+1. Create Tables with Constraints
+sql
+Copy
+Edit
+CREATE TABLE movies (
+    movie_id INT PRIMARY KEY,
+    title VARCHAR(100) NOT NULL,
+    duration_mins INT CHECK (duration_mins > 0),
+    language VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE shows (
+    show_id INT PRIMARY KEY,
+    movie_id INT,
+    show_date DATE NOT NULL,
+    show_time TIME NOT NULL,
+    seats_available INT CHECK (seats_available >= 0),
+    ticket_price DECIMAL(6,2) CHECK (ticket_price > 0),
+    FOREIGN KEY (movie_id) REFERENCES movies(movie_id)
+);
+
+
+
+
+2. Insert Sample Data
+sql
+Copy
+Edit
+INSERT INTO movies VALUES 
+(1, 'Pathaan', 150, 'Hindi'),
+(2, 'RRR', 180, 'Telugu'),
+(3, 'KGF Chapter 2', 168, 'Kannada');
+
+INSERT INTO shows VALUES 
+(101, 1, '2025-04-15', '14:30:00', 120, 250.00),
+(102, 2, '2025-04-15', '18:00:00', 150, 300.00),
+(103, 3, '2025-04-15', '21:30:00', 100, 280.00);
+
+
+
+
+3. Update the Ticket Price for One Show
+sql
+Copy
+Edit
+UPDATE shows
+SET ticket_price = 270.00
+WHERE show_id = 103;
+
+
+
+
+4. Delete One Movie Record
+sql
+Copy
+Edit
+DELETE FROM movies
+WHERE movie_id = 2;
+
+
+
+
+5. Display Show Details with Movie Information
+sql
+Copy
+Edit
+SELECT 
+    s.show_id,
+    m.title,
+    m.language,
+    s.show_date,
+    s.show_time,
+    s.seats_available,
+    s.ticket_price
+FROM 
+    shows s
+JOIN 
+    movies m ON s.movie_id = m.movie_id;
+
+
+
+6. Show Total Shows per Movie
+sql
+Copy
+Edit
+SELECT 
+    m.movie_id,
+    m.title,
+    COUNT(s.show_id) AS total_shows
+FROM 
+    movies m
+LEFT JOIN 
+    shows s ON m.movie_id = s.movie_id
+GROUP BY 
+    m.movie_id, m.title;
+
+
+
+
+
+
+ 7. Create and Execute a Stored Procedure to Check Show Availability
+🔧 Create Stored Procedure:
+sql
+Copy
+Edit
+DELIMITER $$
+
+CREATE PROCEDURE check_availability(IN showID INT)
+BEGIN
+    SELECT 
+        show_id,
+        seats_available
+    FROM 
+        shows
+    WHERE 
+        show_id = showID;
+END $$
+
+DELIMITER ;
+
+
+
+
+
+ Execute the Procedure:
+sql
+Copy
+Edit
+CALL check_availability(101);
+
+
+
+
+
+
+
+8. Drop All Tables
+sql
+Copy
+Edit
+DROP TABLE shows;
+DROP TABLE movies;
+
+
+
+
+
+

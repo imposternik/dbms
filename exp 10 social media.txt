@@ -1,0 +1,128 @@
+exp 10
+
+
+1. Create Tables with Constraints
+sql
+Copy
+Edit
+CREATE TABLE users (
+    user_id INT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    join_date DATE NOT NULL
+);
+
+CREATE TABLE posts (
+    post_id INT PRIMARY KEY,
+    user_id INT,
+    content VARCHAR(255) NOT NULL,
+    post_date DATE NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+
+
+2. Insert Sample Data
+sql
+Copy
+Edit
+INSERT INTO users VALUES 
+(1, 'anil123', 'anil@gmail.com', '2025-04-01'),
+(2, 'priya_s', 'priya@gmail.com', '2025-04-02'),
+(3, 'amitk', 'amit@gmail.com', '2025-04-03');
+
+INSERT INTO posts VALUES 
+(101, 1, 'Hello World!', '2025-04-10'),
+(102, 2, 'Good morning!', '2025-04-11'),
+(103, 1, 'Enjoying the weather.', '2025-04-12');
+
+
+
+
+ 3. Update the Email of One User
+sql
+Copy
+Edit
+UPDATE users
+SET email = 'newanil@gmail.com'
+WHERE user_id = 1;
+
+
+
+
+4. Delete One Post
+sql
+Copy
+Edit
+DELETE FROM posts
+WHERE post_id = 102;
+
+
+
+5. Display Posts with User Information
+sql
+Copy
+Edit
+SELECT 
+    p.post_id,
+    u.username,
+    u.email,
+    p.content,
+    p.post_date
+FROM 
+    posts p
+JOIN 
+    users u ON p.user_id = u.user_id;
+
+
+
+6. Show Total Posts Per User
+sql
+Copy
+Edit
+SELECT 
+    u.user_id,
+    u.username,
+    COUNT(p.post_id) AS total_posts
+FROM 
+    users u
+LEFT JOIN 
+    posts p ON u.user_id = p.user_id
+GROUP BY 
+    u.user_id, u.username;
+
+
+
+7. Create Users for Moderator and Admin with Privileges
+🛠️ First, create MySQL users:
+sql
+Copy
+Edit
+CREATE USER 'moderator'@'localhost' IDENTIFIED BY 'mod123';
+CREATE USER 'admin'@'localhost' IDENTIFIED BY 'admin123';
+
+ Then, grant privileges:
+sql
+Copy
+Edit
+-- Moderator can SELECT and INSERT only
+GRANT SELECT, INSERT ON your_database_name.* TO 'moderator'@'localhost';
+
+-- Admin can do everything
+GRANT ALL PRIVILEGES ON your_database_name.* TO 'admin'@'localhost';
+
+-- Apply changes
+FLUSH PRIVILEGES;
+Replace your_database_name with your actual database name (e.g., social_db).
+
+
+
+
+
+
+8. Drop All Tables
+sql
+Copy
+Edit
+DROP TABLE posts;
+DROP TABLE users;

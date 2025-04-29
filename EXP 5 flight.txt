@@ -1,0 +1,86 @@
+EXP 5 
+CREATE TABLE flights (
+    flight_id INT PRIMARY KEY,
+    flight_no VARCHAR(10) NOT NULL,
+    source VARCHAR(50) NOT NULL,
+    destination VARCHAR(50) NOT NULL,
+    flight_date DATE NOT NULL,
+    seats_available INT CHECK (seats_available >= 0)
+);
+
+CREATE TABLE bookings (
+    booking_id INT PRIMARY KEY,
+    flight_id INT,
+    passenger_name VARCHAR(100) NOT NULL,
+    seats_booked INT CHECK (seats_booked > 0),
+    booking_date DATE DEFAULT CURRENT_DATE,
+    FOREIGN KEY (flight_id) REFERENCES flights(flight_id)
+);
+
+
+-- Insert into flights
+INSERT INTO flights VALUES
+(1, 'AI101', 'Mumbai', 'Delhi', '2025-04-15', 120),
+(2, '6E202', 'Bangalore', 'Kolkata', '2025-04-16', 150),
+(3, 'SG303', 'Chennai', 'Hyderabad', '2025-04-15', 180);
+
+-- Insert into bookings
+INSERT INTO bookings VALUES
+(101, 1, 'Rajesh Kumar', 2, '2025-04-10'),
+(102, 2, 'Priya Sharma', 1, '2025-04-11'),
+(103, 3, 'Amit Patel', 3, '2025-04-12');
+
+
+UPDATE flights
+SET seats_available = seats_available - 2
+WHERE flight_id = 1;
+
+
+DELETE FROM bookings
+WHERE booking_id = 102;
+
+SELECT 
+    b.booking_id,
+    b.passenger_name,
+    b.seats_booked,
+    b.booking_date,
+    f.flight_no,
+    f.source,
+    f.destination,
+    f.flight_date
+FROM bookings b
+JOIN flights f ON b.flight_id = f.flight_id;
+
+
+SELECT 
+    f.flight_no,
+    f.source,
+    f.destination,
+    COUNT(b.booking_id) AS total_bookings
+FROM flights f
+LEFT JOIN bookings b ON f.flight_id = b.flight_id
+GROUP BY f.flight_id, f.flight_no, f.source, f.destination;
+
+DELIMITER //
+
+CREATE PROCEDURE CheckFlightAvailability(IN fid INT)
+BEGIN
+    SELECT 
+        flight_no,
+        source,
+        destination,
+        flight_date,
+        seats_available
+    FROM flights
+    WHERE flight_id = fid;
+END //
+
+DELIMITER ;
+
+-- Example call:
+CALL CheckFlightAvailability(2);
+
+
+
+DROP TABLE IF EXISTS bookings;
+DROP TABLE IF EXISTS flights;

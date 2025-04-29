@@ -1,0 +1,137 @@
+exp 9 
+
+Create Tables with Constraints
+sql
+Copy
+Edit
+CREATE TABLE accounts (
+    account_id INT PRIMARY KEY,
+    holder_name VARCHAR(100) NOT NULL,
+    account_type VARCHAR(20) CHECK (account_type IN ('Savings','Current')),
+    balance DECIMAL(12,2) CHECK (balance >= 0)
+);
+
+CREATE TABLE transactions (
+    transaction_id INT PRIMARY KEY,
+    account_id INT,
+    type VARCHAR(10) CHECK (type IN ('Credit','Debit')),
+    amount DECIMAL(10,2) CHECK (amount > 0),
+    transaction_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (account_id) REFERENCES accounts(account_id)
+);
+
+
+Insert Sample Data
+sql
+Copy
+Edit
+INSERT INTO accounts VALUES 
+(1001, 'Ravi Shankar', 'Savings', 25000.00),
+(1002, 'Priya Malhotra', 'Current', 75000.00),
+(1003, 'Sanjay Patel', 'Savings', 35000.00);
+
+INSERT INTO transactions VALUES 
+(1, 1001, 'Credit', 5000.00, '2025-04-15 10:30:00'),
+(2, 1002, 'Debit', 15000.00, '2025-04-15 11:45:00'),
+(3, 1003, 'Credit', 10000.00, '2025-04-15 14:20:00');
+
+
+Update the Balance of One Account
+sql
+Copy
+Edit
+UPDATE accounts
+SET balance = balance + 5000.00
+WHERE account_id = 1001;
+
+
+Delete One Transaction Record
+sql
+Copy
+Edit
+DELETE FROM transactions
+WHERE transaction_id = 2;
+
+
+Query to Display Transaction Details with Account Info
+sql
+Copy
+Edit
+SELECT 
+    t.transaction_id,
+    a.holder_name,
+    t.type,
+    t.amount,
+    t.transaction_date
+FROM 
+    transactions t
+JOIN 
+    accounts a ON t.account_id = a.account_id;
+
+
+
+
+6. Show Total Transactions per Account
+sql
+Copy
+Edit
+SELECT 
+    a.account_id,
+    a.holder_name,
+    COUNT(t.transaction_id) AS total_transactions
+FROM 
+    accounts a
+LEFT JOIN 
+    transactions t ON a.account_id = t.account_id
+GROUP BY 
+    a.account_id, a.holder_name;
+
+
+
+ 7. Create and Use a Function to Calculate Account Balance After a Transaction
+🔧 Create the Function:
+sql
+Copy
+Edit
+DELIMITER $$
+
+CREATE FUNCTION calculate_balance(
+    current_balance DECIMAL(12,2),
+    trans_type VARCHAR(10),
+    trans_amount DECIMAL(10,2)
+)
+RETURNS DECIMAL(12,2)
+DETERMINISTIC
+BEGIN
+    IF trans_type = 'Credit' THEN
+        RETURN current_balance + trans_amount;
+    ELSEIF trans_type = 'Debit' THEN
+        RETURN current_balance - trans_amount;
+    ELSE
+        RETURN current_balance;
+    END IF;
+END $$
+
+DELIMITER ;
+
+
+
+
+
+🧪 Use the Function:
+Example: Calculate new balance after a debit of ₹3,000 from account with ₹25,000
+
+sql
+Copy
+Edit
+SELECT calculate_balance(25000.00, 'Debit', 3000.00) AS new_balance;
+
+
+
+
+8. Drop All Tables
+sql
+Copy
+Edit
+DROP TABLE transactions;
+DROP TABLE accounts;
